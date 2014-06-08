@@ -8,6 +8,11 @@ Elegant tries to address this issue by providing a very high level and user frie
 Elegant *does not* try to supplant your usual git tool, or even your command-line. It is a secondary tool that you can use as a shortcut to all the common actions you usually do.
 
 ###Main Features
+- Showing local changes
 - Synchronizing your master with upstream
 - Creating and closing branches
 - Synchronizing your branches with master
+
+###Near Future Features
+- Ignore a file/folder/pattern
+- Set a file as "assume unchanged"
