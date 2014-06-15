@@ -19,11 +19,11 @@ public class Elegant extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("elegant.fxml"));
 
         Parent root = loader.load();
         primaryStage.setTitle("Elegant");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setScene(new Scene(root, 800, 640));
         primaryStage.show();
         Controller controller = loader.<Controller>getController();
         controller.initData(primaryStage);

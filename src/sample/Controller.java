@@ -8,6 +8,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.controlsfx.dialog.DialogStyle;
+import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
 
@@ -22,7 +24,6 @@ public class Controller extends VBox {
     private Stage stage;
 
     public Controller() {
-        //FileSystem.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
     public void initData(Stage stage) {
@@ -37,7 +38,30 @@ public class Controller extends VBox {
 
         PathItem selectedDirectory = new PathItem(chooser.showDialog(stage).toPath());
         TreeItem<PathItem> root = PathTreeItem.createNode(selectedDirectory);
-        System.out.println(root);
+        try {
+            GitHelper.LoadGit(selectedDirectory.getPath().toAbsolutePath().toString());
+        } catch (ElephantException ex) {
+            failedOpenProject(ex);
+            return;
+        }
         fileSystemTree.setRoot(root);
+        filterFileSystemTree();
+    }
+
+    private void failedOpenProject(ElephantException ex) {
+        Dialogs.create()
+                .title("Elegant error")
+                .masthead("That wasn't an elegant choice")
+                .message(ex.getMessage())
+                .lightweight()
+                .style(DialogStyle.UNDECORATED)
+                .showError();
+        return;
+    }
+
+    private void filterFileSystemTree() {
+        fileSystemTree.getRoot().getChildren().removeIf(
+                p -> p.getValue().getPath().endsWith(".git")
+        );
     }
 }
