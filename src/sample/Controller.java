@@ -8,10 +8,13 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public class Controller extends VBox {
     @FXML
@@ -20,7 +23,6 @@ public class Controller extends VBox {
     @FXML
     MenuItem openProject;
 
-    private File projectDir;
     private Stage stage;
 
     public Controller() {
@@ -30,38 +32,50 @@ public class Controller extends VBox {
         this.stage = stage;
     }
 
-    public void openProject(ActionEvent event) {
+    public void onOpenProjectAction(ActionEvent event) {
+        openProject();
+    }
+
+    public void openProject() {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Projects chooser");
         File defaultDirectory = new File("c:");
         chooser.setInitialDirectory(defaultDirectory);
 
         PathItem selectedDirectory = new PathItem(chooser.showDialog(stage).toPath());
-        TreeItem<PathItem> root = PathTreeItem.createNode(selectedDirectory);
         try {
             GitHelper.LoadGit(selectedDirectory.getPath().toAbsolutePath().toString());
         } catch (ElephantException ex) {
             failedOpenProject(ex);
             return;
         }
+        TreeItem<PathItem> root = PathTreeItem.createNode(selectedDirectory);
         fileSystemTree.setRoot(root);
-        filterFileSystemTree();
+        // remove ignored files and .git
+        fileSystemTree.getRoot().getChildren().removeIf(
+                path -> path.getValue().getPath().endsWith(".git")
+        );
     }
 
     private void failedOpenProject(ElephantException ex) {
-        Dialogs.create()
+
+        List<Dialogs.CommandLink> links = Arrays.asList(
+                new Dialogs.CommandLink(
+                        "Another chance to make an elegant choice",
+                        "Opens up the folder choser again."),
+                new Dialogs.CommandLink(
+                        "Admit failure",
+                        "Cancel and go back to your work.")
+        );
+        Action answer = Dialogs.create()
                 .title("Elegant error")
                 .masthead("That wasn't an elegant choice")
                 .message(ex.getMessage())
                 .lightweight()
                 .style(DialogStyle.UNDECORATED)
-                .showError();
-        return;
-    }
-
-    private void filterFileSystemTree() {
-        fileSystemTree.getRoot().getChildren().removeIf(
-                p -> p.getValue().getPath().endsWith(".git")
-        );
+                .showCommandLinks(links.get(1), links);
+        if (answer == links.get(0)) {
+            openProject();
+        }
     }
 }
