@@ -13,8 +13,8 @@ hs_err_pid*
 
 # Intellij
 out/
-.idea/
-*.iml
+.idea/workspace.xml
+.idea/tasks.xml
 *.iws
 
 # Maven
