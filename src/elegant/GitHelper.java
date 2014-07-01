@@ -1,8 +1,6 @@
-package sample;
+package elegant;
 
 
-import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -20,6 +18,7 @@ public class GitHelper {
 
     private static Repository repo;
 
+    // Load a git repository
     public static void LoadGit(String repoDirName) {
         try {
             File repoDir = new File(repoDirName + "/.git");
@@ -33,25 +32,11 @@ public class GitHelper {
             repo = builder.build();
         } catch (IOException e) {
             Logger.getLogger(Elegant.class.getName()).log(Level.SEVERE, null, e);
-        } catch (NoWorkTreeException e) {
-            Logger.getLogger(Elegant.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
+    // check if a repository is valid or not
     private static boolean isValidRepository(File repoDir) {
         return RepositoryCache.FileKey.isGitRepository(repoDir, FS.DETECTED);
-    }
-
-    private static boolean hasAtLeastOneReference(Repository repo) {
-        for (Ref ref : repo.getAllRefs().values()) {
-            if (ref.getObjectId() == null)
-                continue;
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isModified(String fileName) {
-        return (true);
     }
 }

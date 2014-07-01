@@ -1,4 +1,4 @@
-package sample;
+package elegant;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,8 +27,14 @@ public class PathTreeItem extends TreeItem<PathItem> {
         super(pathItem);
     }
 
-    public static TreeItem<PathItem> createNode(PathItem pathItem) {
-        return new PathTreeItem(pathItem);
+    @Override
+    public boolean isLeaf() {
+        if (isFirstTimeLeft) {
+            isFirstTimeLeft = false;
+            Path path = getValue().getPath();
+            isLeaf = !Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
+        }
+        return isLeaf;
     }
 
     @Override
@@ -38,16 +44,6 @@ public class PathTreeItem extends TreeItem<PathItem> {
             super.getChildren().setAll(buildChildren(this));
         }
         return super.getChildren();
-    }
-
-    @Override
-    public boolean isLeaf() {
-        if (isFirstTimeLeft) {
-            isFirstTimeLeft = false;
-            Path path = getValue().getPath();
-            isLeaf = !Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS);
-        }
-        return isLeaf;
     }
 
     private ObservableList<TreeItem<PathItem>> buildChildren(TreeItem<PathItem> treeItem) {
@@ -65,5 +61,9 @@ public class PathTreeItem extends TreeItem<PathItem> {
             return children;
         }
         return FXCollections.emptyObservableList();
+    }
+
+    public static TreeItem<PathItem> createNode(PathItem pathItem) {
+        return new PathTreeItem(pathItem);
     }
 }

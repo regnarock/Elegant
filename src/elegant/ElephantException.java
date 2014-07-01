@@ -1,4 +1,4 @@
-package sample;
+package elegant;
 
 /**
  * Created by regnarock on 15/06/2014.

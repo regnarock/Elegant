@@ -1,4 +1,4 @@
-package sample;
+package elegant;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
