@@ -51,6 +51,7 @@ public class Controller extends VBox {
             failedOpenProject(ex);
             return;
         }
+        stage.setTitle(GitHelper.getPath().toString() + " : [" + GitHelper.getPath().getPath().toAbsolutePath() + "] - " + Elegant.getTitle());
     }
 
     public void loadProjectToPathTree() {

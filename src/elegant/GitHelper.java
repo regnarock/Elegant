@@ -42,6 +42,10 @@ public class GitHelper {
         path = new PathItem(new File(repoDirName).toPath());
     }
 
+    public static void Syncronize() {
+        
+    }
+
     // check if a repository is valid or not
     private static boolean isValidRepository(File repoDir) {
         return RepositoryCache.FileKey.isGitRepository(repoDir, FS.DETECTED);
