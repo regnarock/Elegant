@@ -23,21 +23,4 @@ public class Elegant extends Application {
         Controller controller = loader.<Controller>getController();
         controller.initData(primaryStage);
     }
-/*
-    /////////////////////////////////////start event handlers for navigation///////////////////////////////
-    private EventHandler<ActionEvent> reload = new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-            webEngine.reload();
-        }
-    };
-
-    private EventHandler<ActionEvent> go = new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-            System.out.println(addressField.getText());
-            webEngine.load("http://"+addressField.getText());
-        }
-    };
-*/
 }

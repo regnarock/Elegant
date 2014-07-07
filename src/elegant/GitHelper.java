@@ -1,6 +1,9 @@
 package elegant;
 
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -8,6 +11,7 @@ import org.eclipse.jgit.util.FS;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +21,8 @@ import java.util.logging.Logger;
 public class GitHelper {
 
     private static Repository repo;
+    @Getter @Setter(AccessLevel.PRIVATE)
+    private static PathItem    path;
 
     // Load a git repository
     public static void LoadGit(String repoDirName) {
@@ -33,6 +39,7 @@ public class GitHelper {
         } catch (IOException e) {
             Logger.getLogger(Elegant.class.getName()).log(Level.SEVERE, null, e);
         }
+        path = new PathItem(new File(repoDirName).toPath());
     }
 
     // check if a repository is valid or not

@@ -1,7 +1,9 @@
 package elegant;
 
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -21,7 +23,7 @@ public class Controller extends VBox {
     TreeView<PathItem> fileSystemTree;
 
     @FXML
-    MenuItem openProject;
+    Button openProject;
 
     private Stage stage;
 
@@ -32,7 +34,7 @@ public class Controller extends VBox {
         this.stage = stage;
     }
 
-    public void onOpenProjectAction(ActionEvent event) {
+    public void onOpenProjectAction(Event event) {
         openProject();
     }
 
@@ -49,7 +51,10 @@ public class Controller extends VBox {
             failedOpenProject(ex);
             return;
         }
-        TreeItem<PathItem> root = PathTreeItem.createNode(selectedDirectory);
+    }
+
+    public void loadProjectToPathTree() {
+        TreeItem<PathItem> root = PathTreeItem.createNode(GitHelper.getPath());
         fileSystemTree.setRoot(root);
         // remove ignored files and .git
         fileSystemTree.getRoot().getChildren().removeIf(
@@ -62,7 +67,7 @@ public class Controller extends VBox {
         List<Dialogs.CommandLink> links = Arrays.asList(
                 new Dialogs.CommandLink(
                         "Another chance to make an elegant choice",
-                        "Opens up the folder choser again."),
+                        "Opens up the directory chooser again."),
                 new Dialogs.CommandLink(
                         "Admit failure",
                         "Cancel and go back to your work.")
