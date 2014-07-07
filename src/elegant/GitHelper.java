@@ -4,6 +4,8 @@ package elegant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -20,30 +22,23 @@ import java.util.logging.Logger;
  */
 public class GitHelper {
 
-    private static Repository repo;
-    @Getter @Setter(AccessLevel.PRIVATE)
-    private static PathItem    path;
+    private static Git git;
 
     // Load a git repository
-    public static void LoadGit(String repoDirName) {
+    public static void LoadGit(File repoDir) {
         try {
-            File repoDir = new File(repoDirName + "/.git");
-
-            if (!isValidRepository(repoDir))
-                throw new ElephantException("No valid git repository found at : \"" + repoDirName + "\"");
-            FileRepositoryBuilder builder = new FileRepositoryBuilder()
-                    .setGitDir(repoDir)
-                    .readEnvironment()
-                    .findGitDir();
-            repo = builder.build();
+            git = Git.open(repoDir);
         } catch (IOException e) {
-            Logger.getLogger(Elegant.class.getName()).log(Level.SEVERE, null, e);
+            throw new ElephantException("No valid git repository found at : \"" + repoDir + "\"", e);
         }
-        path = new PathItem(new File(repoDirName).toPath());
+    }
+
+    public static Path getPath() {
+        return git.getRepository().getWorkTree().toPath();
     }
 
     public static void Syncronize() {
-        
+
     }
 
     // check if a repository is valid or not

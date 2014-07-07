@@ -15,6 +15,7 @@ import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,18 +45,20 @@ public class Controller extends VBox {
         File defaultDirectory = new File("c:");
         chooser.setInitialDirectory(defaultDirectory);
 
-        PathItem selectedDirectory = new PathItem(chooser.showDialog(stage).toPath());
+        File selectedDirectoryFile = chooser.showDialog(stage);
+        // in case of cancel
+        if (selectedDirectoryFile == null) return ;
         try {
-            GitHelper.LoadGit(selectedDirectory.getPath().toAbsolutePath().toString());
+            GitHelper.LoadGit(selectedDirectoryFile);
         } catch (ElephantException ex) {
             failedOpenProject(ex);
             return;
         }
-        stage.setTitle(GitHelper.getPath().toString() + " : [" + GitHelper.getPath().getPath().toAbsolutePath() + "] - " + Elegant.getTitle());
+        stage.setTitle(GitHelper.getPath().toString() + " : [" + GitHelper.getPath().toAbsolutePath() + "] - " + Elegant.getTitle());
     }
 
     public void loadProjectToPathTree() {
-        TreeItem<PathItem> root = PathTreeItem.createNode(GitHelper.getPath());
+        TreeItem<PathItem> root = PathTreeItem.createNode(new PathItem(GitHelper.getPath()));
         fileSystemTree.setRoot(root);
         // remove ignored files and .git
         fileSystemTree.getRoot().getChildren().removeIf(
