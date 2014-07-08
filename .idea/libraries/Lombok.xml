@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Lombok" type="repository">
-    <properties maven-id="org.controlsfx:controlsfx:8.0.6" />
+    <properties maven-id="org.projectlombok:lombok:1.14.4" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/controlsfx-8.0.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lombok-1.14.4.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="org.eclipse.jgit:org.eclipse.jgit.http.server:3.3.2.201404171909-r" type="repository">
+  <library name="JGit" type="repository">
     <properties maven-id="org.eclipse.jgit:org.eclipse.jgit.http.server:3.3.2.201404171909-r" />
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/org.eclipse.jgit.http.server-3.3.2.201404171909-r.jar!/" />
@@ -13,6 +13,8 @@
       <root url="jar://$PROJECT_DIR$/lib/servlet-api-2.5.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../jgit/org.eclipse.jgit/src" />
+    </SOURCES>
   </library>
 </component>
