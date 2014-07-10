@@ -1,10 +1,8 @@
 package elegant;
 
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -15,9 +13,9 @@ import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Controller extends VBox {
     @FXML
@@ -35,11 +33,22 @@ public class Controller extends VBox {
         this.stage = stage;
     }
 
+    /*
+     * External UI-linked public methods
+     */
     public void onOpenProjectAction(Event event) {
         openProject();
     }
 
-    public void openProject() {
+    public void onSyncronizeAction(Event event) {
+        syncronize();
+    }
+
+    /*
+     * Internal private methods
+     */
+
+    private void openProject() {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Projects chooser");
         File defaultDirectory = new File("c:");
@@ -49,15 +58,24 @@ public class Controller extends VBox {
         // in case of cancel
         if (selectedDirectoryFile == null) return ;
         try {
-            GitHelper.LoadGit(selectedDirectoryFile);
+            GitHelper.loadGit(selectedDirectoryFile);
         } catch (ElephantException ex) {
-            failedOpenProject(ex);
+            failedOpenProject(ex.getMessage());
             return;
         }
         stage.setTitle(GitHelper.getPath().toString() + " : [" + GitHelper.getPath().toAbsolutePath() + "] - " + Elegant.getTitle());
     }
 
-    public void loadProjectToPathTree() {
+    private void syncronize() {
+        try {
+            GitHelper.syncronize();
+        } catch (ElephantException ex) {
+            failedSynchronize(ex.getMessage());
+            return;
+        }
+    }
+
+    private void loadProjectToPathTree() {
         TreeItem<PathItem> root = PathTreeItem.createNode(new PathItem(GitHelper.getPath()));
         fileSystemTree.setRoot(root);
         // remove ignored files and .git
@@ -66,7 +84,16 @@ public class Controller extends VBox {
         );
     }
 
-    private void failedOpenProject(ElephantException ex) {
+    private void failedSynchronize(String message) {
+        Action answer = Dialogs.create()
+                .masthead("Inelegant synchronize")
+                .message(message)
+                .style(DialogStyle.UNDECORATED)
+                .lightweight()
+                .showError();
+    }
+
+    private void failedOpenProject(String message) {
 
         List<Dialogs.CommandLink> links = Arrays.asList(
                 new Dialogs.CommandLink(
@@ -79,7 +106,7 @@ public class Controller extends VBox {
         Action answer = Dialogs.create()
                 .title("Elegant error")
                 .masthead("That wasn't an elegant choice")
-                .message(ex.getMessage())
+                .message(message)
                 .lightweight()
                 .style(DialogStyle.UNDECORATED)
                 .showCommandLinks(links.get(1), links);

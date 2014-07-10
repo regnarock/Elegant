@@ -38,7 +38,7 @@
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </opaqueInsets>
                             <children>
-                                <Button fx:id="synchronizeActionBtn" mnemonicParsing="false" styleClass="btn btn-sync" text="Synchronize" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                                <Button fx:id="synchronizeActionBtn" mnemonicParsing="false" onMouseReleased="#onSyncronizeAction" styleClass="btn btn-sync" text="Synchronize" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                     <GridPane.margin>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                     </GridPane.margin>

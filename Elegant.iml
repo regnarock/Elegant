@@ -7,9 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.eclipse.jgit:org.eclipse.jgit.http.server:3.3.2.201404171909-r" level="project" />
-    <orderEntry type="library" name="Lombok" level="project" />
-    <orderEntry type="library" name="org.projectlombok:lombok:1.14.4" level="project" />
+    <orderEntry type="library" exported="" name="JGit" level="project" />
+    <orderEntry type="library" exported="" name="ControlFX" level="project" />
+    <orderEntry type="library" exported="" name="Lombok" level="project" />
   </component>
 </module>
 
