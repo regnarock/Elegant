@@ -12,9 +12,9 @@
       <root url="jar://$PROJECT_DIR$/lib/commons-codec-1.4.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/servlet-api-2.5.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/../jgit/org.eclipse.jgit/src" />
-    </SOURCES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.jgit.http.server-3.3.2.201404171909-r-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
   </library>
 </component>
