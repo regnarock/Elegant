@@ -6,11 +6,11 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.RebaseCommand;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.errors.*;
+import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryState;
-import org.eclipse.jgit.transport.FetchResult;
-import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public class GitHelper {
         return git.getRepository().getWorkTree().toPath();
     }
 
-    public static void syncronize() {
+    public static void synchronize() {
         PullResult pullResult = pull();
         switch (pullResult.getRebaseResult().getStatus()) {
             case FAILED:
@@ -98,21 +98,30 @@ public class GitHelper {
             result.getRemoteUpdates().forEach(remoteRefUpdate -> {
                 switch (remoteRefUpdate.getStatus()) {
                     case REJECTED_NODELETE:
+                        System.out.println("Synchronize: push - REJECTED_NODELETE");
                         throw new ElephantException("Cannot synchronize: remote directory doesn't support/allow deleting references.");
                     case REJECTED_NONFASTFORWARD:
+                        System.out.println("Synchronize: push - REJECTED_NONFASTFORWARD");
                         // shouldn't happen since we just pulled
                         break;
                     case NON_EXISTING:
+                        System.out.println("Synchronize: push - NON_EXISTING");
                     case NOT_ATTEMPTED:
+                        System.out.println("Synchronize: push - NOT_ATTEMPTED");
                     case AWAITING_REPORT:
+                        System.out.println("Synchronize: push - AWAITING_REPORT");
                         // shouldn't happen
                         throw new ElephantException("Cannot synchronize: " + remoteRefUpdate.getMessage());
                     case REJECTED_OTHER_REASON:
+                        System.out.println("Synchronize: push - REJECTED_OTHER_REASON");
                         throw new ElephantException("Cannot synchronize: " + remoteRefUpdate.getMessage());
                     case REJECTED_REMOTE_CHANGED:
+                        System.out.println("Synchronize: push - REJECTED_REMOTE_CHANGED");
                         throw new ElephantException("Cannot synchronize: remote directory has new changes.");
                     case OK:
+                        System.out.println("Synchronize: push - OK");
                     case UP_TO_DATE:
+                        System.out.println("Synchronize: push - UP_TO_DATE");
                         // nothing to do
                         break;
                 }
@@ -134,11 +143,13 @@ public class GitHelper {
 
     private static Iterable<PushResult> push() {
         try {
-            return git.push().call();
+            return git.push()
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("regnarock", "|+x;4N$kvH"))
+                    .call();
         }/*catch (InvalidRemoteException e) {
         } catch (TransportException e) {
         }*/catch (GitAPIException e) {
-            throw new ElephantException(e.getMessage(), e);
+            throw new ElephantException("push failed:" + e.getMessage(), e);
         }
     }
 
@@ -146,6 +157,7 @@ public class GitHelper {
         try {
             return git.pull()
                     .setRebase(true)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("regnarock", "Oblivion6"))
                     .call();
         } /* catch (WrongRepositoryStateException e) {
         } catch (InvalidConfigurationException e) {

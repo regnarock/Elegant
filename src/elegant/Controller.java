@@ -15,7 +15,6 @@ import org.controlsfx.dialog.Dialogs;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Controller extends VBox {
     @FXML
@@ -40,8 +39,8 @@ public class Controller extends VBox {
         openProject();
     }
 
-    public void onSyncronizeAction(Event event) {
-        syncronize();
+    public void onSynchronizeAction(Event event) {
+        synchronize();
     }
 
     /*
@@ -66,9 +65,9 @@ public class Controller extends VBox {
         stage.setTitle(GitHelper.getPath().toString() + " : [" + GitHelper.getPath().toAbsolutePath() + "] - " + Elegant.getTitle());
     }
 
-    private void syncronize() {
+    private void synchronize() {
         try {
-            GitHelper.syncronize();
+            GitHelper.synchronize();
         } catch (ElephantException ex) {
             failedSynchronize(ex.getMessage());
             return;
