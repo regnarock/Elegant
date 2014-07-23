@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -18,6 +19,7 @@
                 <ToolBar prefHeight="40.0" prefWidth="200.0" styleClass="navbar">
                     <items>
                         <Button fx:id="openProject" mnemonicParsing="false" onMouseReleased="#onOpenProjectAction" styleClass="btn btn-open" text="Open Project" />
+                  <Button mnemonicParsing="false" onAction="#onProjectCredentialsAction" text="Project Credentials" />
                     </items>
                 </ToolBar>
                 <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">

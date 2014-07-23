@@ -1,14 +1,24 @@
 package elegant;
 
+import elegant.exceptions.ElephantException;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.ButtonBar;
+import org.controlsfx.control.action.AbstractAction;
 import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
@@ -24,6 +34,22 @@ public class Controller extends VBox {
     Button openProject;
 
     private Stage stage;
+
+    // The dialog of credentials will consist of two input fields (username and password),
+    // and have two buttons: Login and Cancel.
+    final TextField txUserName = new TextField();
+    final PasswordField txPassword = new PasswordField();
+    final Action actionLogin = new AbstractAction("Login") {
+        {
+            ButtonBar.setType(this, ButtonBar.ButtonType.OK_DONE);
+        }
+
+        @Override
+        public void handle(ActionEvent e) {
+            Dialog dlg = (Dialog) e.getSource();
+            dlg.hide();
+        }
+    };
 
     public Controller() {
     }
@@ -41,6 +67,10 @@ public class Controller extends VBox {
 
     public void onSynchronizeAction(Event event) {
         synchronize();
+    }
+
+    public void onProjectCredentialsAction(Event event) {
+        setProjectCredentials();
     }
 
     /*
@@ -67,7 +97,7 @@ public class Controller extends VBox {
 
     private void synchronize() {
         try {
-            GitHelper.synchronize();
+            GitHelper.synchronize(txUserName.getText(), txPassword.getText());
         } catch (ElephantException ex) {
             failedSynchronize(ex.getMessage());
             return;
@@ -112,5 +142,56 @@ public class Controller extends VBox {
         if (answer == links.get(0)) {
             openProject();
         }
+    }
+
+    // This method is called when the user types into the username / password fields
+    private void validate() {
+        actionLogin.disabledProperty().set(
+                txUserName.getText().trim().isEmpty() || txPassword.getText().trim().isEmpty());
+    }
+
+    // Imagine that this method is called somewhere in your codebase
+    private void setProjectCredentials() {
+        Dialog dlg = new Dialog(null, "Login Dialog");
+
+        // listen to user input on dialog (to enable / disable the login button)
+        ChangeListener<String> changeListener = new ChangeListener<String>() {
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                validate();
+            }
+        };
+        txUserName.textProperty().addListener(changeListener);
+        txPassword.textProperty().addListener(changeListener);
+
+        // layout a custom GridPane containing the input fields and labels
+        final GridPane content = new GridPane();
+        content.setHgap(10);
+        content.setVgap(10);
+
+        content.add(new Label("User name"), 0, 0);
+        content.add(txUserName, 1, 0);
+        GridPane.setHgrow(txUserName, Priority.ALWAYS);
+        content.add(new Label("Password"), 0, 1);
+        content.add(txPassword, 1, 1);
+        GridPane.setHgrow(txPassword, Priority.ALWAYS);
+
+        // create the dialog with a custom graphic and the gridpane above as the
+        // main content region
+        dlg.setResizable(false);
+        dlg.setIconifiable(false);
+        dlg.setContent(content);
+        dlg.getActions().addAll(actionLogin, Dialog.Actions.CANCEL);
+        validate();
+
+        // request focus on the username field by default (so the user can
+        // type immediately without having to click first)
+        Platform.runLater(
+                new Runnable() {
+                    public void run() {
+                        txUserName.requestFocus();
+                    }
+                });
+
+        dlg.show();
     }
 }

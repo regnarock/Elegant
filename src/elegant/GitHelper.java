@@ -1,12 +1,11 @@
 package elegant;
 
 
+import elegant.exceptions.ElephantException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.RebaseCommand;
-import org.eclipse.jgit.api.RebaseResult;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.*;
-import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryState;
@@ -48,7 +47,7 @@ public class GitHelper {
         return git.getRepository().getWorkTree().toPath();
     }
 
-    public static void synchronize() {
+    public static void synchronize(String login, String pwd) {
         PullResult pullResult = pull();
         switch (pullResult.getRebaseResult().getStatus()) {
             case FAILED:
@@ -93,7 +92,7 @@ public class GitHelper {
                 //can't happen here, this is not rebase -i
                 break;
         }
-        Iterable<PushResult> pushResult = push();
+        Iterable<PushResult> pushResult = push(login, pwd);
         pushResult.forEach(result -> {
             result.getRemoteUpdates().forEach(remoteRefUpdate -> {
                 switch (remoteRefUpdate.getStatus()) {
@@ -141,15 +140,18 @@ public class GitHelper {
         }
     }
 
-    private static Iterable<PushResult> push() {
+    private static Iterable<PushResult> push(String login, String pwd) {
         try {
-            return git.push()
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("regnarock", "|+x;4N$kvH"))
-                    .call();
+            PushCommand pushCmd = git.push();
+
+            if (login != null && pwd != null)
+                pushCmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(login, pwd));
+            return pushCmd.call();
         }/*catch (InvalidRemoteException e) {
-        } catch (TransportException e) {
+        }catch (TransportException e) {
+            throw new ElephantException(e.getMessage(), e);
         }*/catch (GitAPIException e) {
-            throw new ElephantException("push failed:" + e.getMessage(), e);
+            throw new ElephantException(e.getMessage(), e);
         }
     }
 
@@ -157,7 +159,6 @@ public class GitHelper {
         try {
             return git.pull()
                     .setRebase(true)
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider("regnarock", "Oblivion6"))
                     .call();
         } /* catch (WrongRepositoryStateException e) {
         } catch (InvalidConfigurationException e) {
