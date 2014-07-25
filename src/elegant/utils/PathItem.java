@@ -1,4 +1,4 @@
-package elegant;
+package elegant.utils;
 
 import java.nio.file.Path;
 

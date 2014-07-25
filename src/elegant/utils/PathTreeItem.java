@@ -1,5 +1,6 @@
-package elegant;
+package elegant.utils;
 
+import elegant.Elegant;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
