@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane styleClass="elegant-window" stylesheets="@../resources/css/default.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="elegant.Controller">
+<GridPane styleClass="elegant-window" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="elegant.Controller">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
     </columnConstraints>
@@ -18,11 +18,7 @@
             <children>
                 <ToolBar prefHeight="40.0" prefWidth="200.0" styleClass="navbar">
                     <items>
-                        <Button fx:id="openProject" mnemonicParsing="false" onMouseReleased="#onOpenProjectAction" text="Open Project">
-                     <styleClass>
-                        <String fx:value="btn" />
-                        <String fx:value="btn-open" />
-                     </styleClass></Button>
+                        <Button fx:id="openProject" mnemonicParsing="false" onMouseReleased="#onOpenProjectAction" styleClass="btn btn-open" text="Open Project" />
                   <Button mnemonicParsing="false" onAction="#onProjectCredentialsAction" text="Project Credentials" />
                     </items>
                 </ToolBar>
