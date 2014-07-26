@@ -27,7 +27,7 @@ package elegant.exceptions;
 /**
  * Created by regnarock on 25/07/2014.
  */
-public class CredentialsException extends RuntimeException {
+public class CredentialsException extends Exception {
 
     public CredentialsException(String message, Throwable cause) {
         super(message, cause);

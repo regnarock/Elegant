@@ -1,26 +1,16 @@
 package elegant;
 
-import elegant.data.Configuration;
 import elegant.exceptions.CredentialsException;
 import elegant.exceptions.ElephantException;
 import elegant.utils.PathItem;
 import elegant.utils.PathTreeItem;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.controlsfx.control.ButtonBar;
-import org.controlsfx.control.action.AbstractAction;
 import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
@@ -36,14 +26,14 @@ public class Controller extends VBox {
     Button openProject;
 
     private Stage stage;
-    private Credentials credentials;
+    private Credentials credentialsController;
 
     public Controller() {
     }
 
     public void initData(Stage stage) {
         this.stage = stage;
-        credentials = new Credentials(stage);
+        credentialsController = new Credentials(stage);
     }
 
     /*
@@ -58,7 +48,11 @@ public class Controller extends VBox {
     }
 
     public void onProjectCredentialsAction(Event event) {
-        credentials.saveCredentials();
+        try {
+            credentialsController.saveCredentials();
+        } catch (CredentialsException e) {
+            failedSetCredentials(e.getMessage());
+        }
     }
 
     /*
@@ -85,8 +79,8 @@ public class Controller extends VBox {
     private void synchronize() {
         try {
             GitHelper.synchronize(
-                    credentials.getUserInfo().getUserName(),
-                    credentials.getUserInfo().getPassword());
+                    credentialsController.getUserInfo().getUserName(),
+                    credentialsController.getUserInfo().getPassword());
         } catch (ElephantException ex) {
             failedSynchronize(ex.getMessage());
             return;
@@ -101,8 +95,17 @@ public class Controller extends VBox {
         fileSystemTree.setRoot(root);
         // remove ignored files and .git
         fileSystemTree.getRoot().getChildren().removeIf(
-                path -> path.getValue().getPath().endsWith(".git")
+                                                               path -> path.getValue().getPath().endsWith(".git")
         );
+    }
+
+    private  void failedSetCredentials(String message) {
+        Action answer = Dialogs.create()
+                .masthead("Credentials issue.")
+                .message(message)
+                .style(DialogStyle.UNDECORATED)
+                .lightweight()
+                .showError();
     }
 
     private void failedSynchronize(String message) {
