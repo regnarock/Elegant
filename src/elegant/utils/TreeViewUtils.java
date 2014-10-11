@@ -22,18 +22,12 @@
  * SOFTWARE.
  */
 
-package elegant.exceptions;
+package elegant.utils;
 
 /**
- * Created by regnarock on 15/06/2014.
+ * Created by regnarock on 09/10/2014.
  */
-public class ElephantException extends RuntimeException {
+public class TreeViewUtils
+{
 
-    public ElephantException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ElephantException(String message) {
-        super(message);
-    }
 }
