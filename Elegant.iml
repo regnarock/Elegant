@@ -10,6 +10,7 @@
     <orderEntry type="library" exported="" name="JGit" level="project" />
     <orderEntry type="library" exported="" name="ControlFX" level="project" />
     <orderEntry type="library" exported="" name="Lombok" level="project" />
+    <orderEntry type="library" name="DataFX" level="project" />
   </component>
 </module>
 

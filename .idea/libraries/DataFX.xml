@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="DataFX" type="repository">
+    <properties maven-id="org.javafxdata:datafx-core:8.0b1" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/datafx-core-8.0b1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-mapper-asl-1.9.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-asl-1.9.9.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
