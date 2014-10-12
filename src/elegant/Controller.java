@@ -28,9 +28,11 @@ import elegant.exceptions.CredentialsException;
 import elegant.exceptions.ElephantException;
 import elegant.utils.PathItem;
 import elegant.utils.PathTreeItem;
+import elegant.utils.ProgressUpdater;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -46,19 +48,29 @@ import java.util.Arrays;
 import java.util.List;
 
 @Log
-public class Controller extends VBox {
+public class Controller extends VBox
+{
     @FXML
     TreeView<PathItem> workingDirTree;
     @FXML
     TreeView<PathItem> stageDirTree;
     @FXML
     TreeView<PathItem> indexDirTree;
-
     @FXML
-    Button openProject;
+    ProgressIndicator  synchronizeIndicator;
+    @FXML
+    ProgressIndicator  updateIndicator;
+    @FXML
+    ProgressIndicator  createBranchIndicator;
+    @FXML
+    ProgressIndicator  terminateBranchIndicator;
+    @FXML
+    Button             openProject;
 
-    private Stage stage;
+    private Stage       stage;
     private Credentials credentialsController;
+
+    private GitWrapper git;
 
     public Controller() {
     }
@@ -79,12 +91,46 @@ public class Controller extends VBox {
         synchronize();
     }
 
+    private void synchronize() {
+        log.info("synchronize");
+        synchronizeIndicator.setProgress(-1);
+        try {
+            git.synchronize(credentialsController.getUserInfo().getUserName(),
+                            credentialsController.getUserInfo().getPassword(), new ProgressUpdater(synchronizeIndicator)
+            );
+        } catch (CredentialsException | ElephantException ex) {
+            failedSynchronize(ex.getMessage());
+            return;
+        } finally {
+            synchronizeIndicator.setProgress(1);
+        }
+    }
+
+    private void failedSynchronize(String message) {
+        log.info("FailedSynchronize: " + message);
+        Dialogs.create()
+               .masthead("Inelegant synchronize")
+               .message(message)
+               .style(DialogStyle.UNDECORATED)
+               .lightweight()
+               .showError();
+    }
+
     public void onProjectCredentialsAction(Event event) {
         try {
             credentialsController.saveCredentials();
         } catch (CredentialsException e) {
             failedSetCredentials(e.getMessage());
         }
+    }
+
+    private void failedSetCredentials(String message) {
+        Dialogs.create()
+               .masthead("Credentials issue.")
+               .message(message)
+               .style(DialogStyle.UNDECORATED)
+               .lightweight()
+               .showError();
     }
 
     /*
@@ -98,85 +144,41 @@ public class Controller extends VBox {
 
         File selectedDirectoryFile = chooser.showDialog(stage);
         // in case of cancel
-        if (selectedDirectoryFile == null) return ;
+        if (selectedDirectoryFile == null) return;
         try {
-            GitHelper.loadGit(selectedDirectoryFile);
+            git = new GitWrapper(selectedDirectoryFile);
         } catch (ElephantException ex) {
             failedOpenProject(ex.getMessage());
             return;
         }
-        stage.setTitle(
-            GitHelper.getPath().toString()
-                + " : [" + GitHelper.getPath().toAbsolutePath() + "] - "
-                + Elegant.getTitle()
+        stage.setTitle(git.getPath().toString() + " : [" + git.getPath().toAbsolutePath() + "] - " + Elegant.getTitle()
         );
         loadProjectToPathTree();
     }
 
-    private void synchronize() {
-        log.info("synchronize");
-        try {
-            GitHelper.synchronize(
-                credentialsController.getUserInfo().getUserName(),
-                credentialsController.getUserInfo().getPassword());
-        } catch (ElephantException ex) {
-            failedSynchronize(ex.getMessage());
-            return;
-        } catch (CredentialsException ex) {
-            failedSynchronize(ex.getMessage());
-            return;
-        }
-    }
-
     private void loadProjectToPathTree() {
-        TreeItem<PathItem> root = PathTreeItem.createNode(new PathItem(GitHelper.getPath()));
+        TreeItem<PathItem> root = PathTreeItem.createNode(new PathItem(git.getPath()));
         workingDirTree.setRoot(root);
         // remove ignored files and .git
-        workingDirTree.getRoot().getChildren().removeIf(
-            path -> path.getValue().getPath().endsWith(".git")
+        workingDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
         );
-        root = PathTreeItem.createNode(new PathItem(GitHelper.getPath()));
+        root = PathTreeItem.createNode(new PathItem(git.getPath()));
         stageDirTree.setRoot(root);
         // remove ignored files and .git
-        stageDirTree.getRoot().getChildren().removeIf(
-            path -> path.getValue().getPath().endsWith(".git")
+        stageDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
         );
-        root = PathTreeItem.createNode(new PathItem(GitHelper.getPath()));
+        root = PathTreeItem.createNode(new PathItem(git.getPath()));
         indexDirTree.setRoot(root);
         // remove ignored files and .git
-        indexDirTree.getRoot().getChildren().removeIf(
-            path -> path.getValue().getPath().endsWith(".git")
+        indexDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
         );
-    }
-
-    private  void failedSetCredentials(String message) {
-        Action answer = Dialogs.create()
-                               .masthead("Credentials issue.")
-                               .message(message)
-                               .style(DialogStyle.UNDECORATED)
-                               .lightweight()
-                               .showError();
-    }
-
-    private void failedSynchronize(String message) {
-        Action answer = Dialogs.create()
-                               .masthead("Inelegant synchronize")
-                               .message(message)
-                               .style(DialogStyle.UNDECORATED)
-                               .lightweight()
-                               .showError();
     }
 
     private void failedOpenProject(String message) {
 
         List<Dialogs.CommandLink> links = Arrays.asList(
-            new Dialogs.CommandLink(
-                "Another chance to make an elegant choice",
-                "Opens up the directory chooser again."
-            ),
-            new Dialogs.CommandLink(
-                "Admit failure",
-                "Cancel and go back to your work."
+            new Dialogs.CommandLink("Another chance to make an elegant choice", "Opens up the directory chooser again."
+            ), new Dialogs.CommandLink("Admit failure", "Cancel and go back to your work."
             )
         );
         Action answer = Dialogs.create()

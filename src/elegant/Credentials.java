@@ -64,7 +64,7 @@ public class Credentials
     private Object owner;
 
     private Dialogs.UserInfo userInfo;
-    private boolean isLogged;
+    private boolean          isLogged;
 
     public Credentials(Object owner) {
         this.owner = owner;
@@ -73,7 +73,7 @@ public class Credentials
     public Dialogs.UserInfo getUserInfo() throws CredentialsException {
         if (!isLogged) {
             String userName = Configuration.getUserName(),
-                    password = Configuration.getPassword();
+                password = Configuration.getPassword();
             // use non-stored and non-reversible password to encrypt data
             if (Configuration.isSaved() && !userName.isEmpty() && !password.isEmpty()) {
                 String pwd = requestMasterPassword();
@@ -82,9 +82,8 @@ public class Credentials
                     password = PasswordHash.decrypt(password, pwd);
                     System.out.println("load " + userName + "/" + password);
                 } catch (InvalidKeySpecException | UnsupportedEncodingException | BadPaddingException | DecoderException |
-                         NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException |
-                         IllegalBlockSizeException | NoSuchPaddingException e)
-                {
+                    NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException |
+                    IllegalBlockSizeException | NoSuchPaddingException e) {
                     throw new CredentialsException("Could not get credentials IDs : " + e.getMessage());
                 }
             }
@@ -101,8 +100,8 @@ public class Credentials
             newUserName = PasswordHash.encrypt(userName, clearPwd);
             newPassword = PasswordHash.encrypt(password, clearPwd);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException |
-                 IllegalBlockSizeException | UnsupportedEncodingException |
-                 InvalidParameterSpecException | InvalidKeySpecException e) {
+            IllegalBlockSizeException | UnsupportedEncodingException |
+            InvalidParameterSpecException | InvalidKeySpecException e) {
             throw new CredentialsException("Could not set credentials IDs : " + e.getMessage());
         }
         userInfo = new Dialogs.UserInfo(userName, password);
@@ -122,7 +121,8 @@ public class Credentials
         final TextField txUserName = new TextField(wasNotSaved ? "" : getUserInfo().getUserName());
         final PasswordField txPassword = new PasswordField();
         txPassword.setText(wasNotSaved ? "" : getUserInfo().getPassword());
-        final Action actionSave = new AbstractAction("Save") {
+        final Action actionSave = new AbstractAction("Save")
+        {
             {
                 ButtonBar.setType(this, ButtonBar.ButtonType.OK_DONE);
             }
@@ -135,9 +135,9 @@ public class Credentials
         };
         // this lambda is called when the user types into the username / password fields
         Runnable validate = () -> {
-            actionSave.disabledProperty().set(
-                txUserName.getText().trim().isEmpty() || txPassword.getText().trim().isEmpty()
-            );
+            actionSave.disabledProperty()
+                      .set(txUserName.getText().trim().isEmpty() || txPassword.getText().trim().isEmpty()
+                      );
         };
         // listen to user input on dialog (to enable / disable the login button and save box)
         ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
@@ -169,12 +169,15 @@ public class Credentials
         // request focus on the username field by default (so the user can
         // type immediately without having to click first)
         Platform.runLater(() -> {
-            txUserName.requestFocus();
-        });
-        if (dlg.show() == actionSave &&
-            (txUserName.getText().compareTo(getUserInfo().getUserName()) != 0 ||
-             txPassword.getText().compareTo(getUserInfo().getPassword()) != 0))
-        {
+                              txUserName.requestFocus();
+                          }
+        );
+        if (dlg.show() == actionSave && (txUserName.getText()
+                                                   .compareTo(getUserInfo().getUserName()) != 0 || txPassword.getText()
+                                                                                                             .compareTo(
+                                                                                                                 getUserInfo()
+                                                                                                                     .getPassword()
+                                                                                                             ) != 0)) {
             setUserInfo(txUserName.getText(), txPassword.getText());
         }
     }
@@ -219,10 +222,9 @@ public class Credentials
         // Update save button and error text  when user enters character in text fields
         Runnable validate = () -> {
             boolean pwdDifferent = txPwd1.getText().trim().compareTo(txPwd2.getText().trim()) != 0;
-            actionSave.disabledProperty().set(
-                txPwd1.getText().trim().isEmpty() ||
-                txPwd2.getText().trim().isEmpty() ||
-                pwdDifferent
+            actionSave.disabledProperty().set(txPwd1.getText().trim().isEmpty() ||
+                                                  txPwd2.getText().trim().isEmpty() ||
+                                                  pwdDifferent
             );
             txError.setVisible(!txPwd2.getText().trim().isEmpty() && pwdDifferent
             );
@@ -251,9 +253,7 @@ public class Credentials
         dlg.getActions().addAll(Dialog.Actions.CANCEL, actionSave);
         // request focus on the username field by default (so the user can
         // type immediately without having to click first)
-        Platform.runLater(() -> {
-            txPwd1.requestFocus();
-        });
+        Platform.runLater(() -> txPwd1.requestFocus());
         Action response = dlg.show();
         if (response == actionSave) {
             try {
@@ -265,8 +265,7 @@ public class Credentials
             }
             Configuration.setIsSaved(true);
             showCredentialsSecured();
-        }
-        else throw new CredentialsException("Master password is required to save credentials.");
+        } else throw new CredentialsException("Master password is required to save credentials.");
         return txPwd1.getText();
     }
 
@@ -290,8 +289,9 @@ public class Credentials
         dlg.setContent(content);
         dlg.setResizable(false);
         Platform.runLater(() -> {
-            pwd.requestFocus();
-        });
+                              pwd.requestFocus();
+                          }
+        );
         Action response = dlg.show();
         if (response == Dialog.Actions.CANCEL) throw new CredentialsException("Access denied.");
         try {

@@ -1,0 +1,4 @@
+- allowing user to copy errors to clipboard or to select text
+- allow multiple accounts
+- fetch distant sometimes, and signal that a synchronize is available
+- gives how much stuff was fetched and rebase, then pushed when synchronizing
