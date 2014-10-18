@@ -40,12 +40,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import lombok.extern.java.Log;
 import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.DialogStyle;
+import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.DialogAction;
 import org.controlsfx.dialog.Dialogs;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 @Log
 public class Controller extends VBox
@@ -95,8 +94,9 @@ public class Controller extends VBox
         log.info("synchronize");
         synchronizeIndicator.setProgress(-1);
         try {
-            git.synchronize(credentialsController.getUserInfo().getUserName(),
-                            credentialsController.getUserInfo().getPassword(), new ProgressUpdater(synchronizeIndicator)
+            git.synchronize(
+                credentialsController.getUserInfo().name(), credentialsController.getUserInfo().password(),
+                new ProgressUpdater(synchronizeIndicator)
             );
         } catch (CredentialsException | ElephantException ex) {
             failedSynchronize(ex.getMessage());
@@ -111,7 +111,7 @@ public class Controller extends VBox
         Dialogs.create()
                .masthead("Inelegant synchronize")
                .message(message)
-               .style(DialogStyle.UNDECORATED)
+               .styleClass(Dialog.STYLE_CLASS_UNDECORATED)
                .lightweight()
                .showError();
     }
@@ -128,7 +128,7 @@ public class Controller extends VBox
         Dialogs.create()
                .masthead("Credentials issue.")
                .message(message)
-               .style(DialogStyle.UNDECORATED)
+               .styleClass(Dialog.STYLE_CLASS_UNDECORATED)
                .lightweight()
                .showError();
     }
@@ -151,7 +151,8 @@ public class Controller extends VBox
             failedOpenProject(ex.getMessage());
             return;
         }
-        stage.setTitle(git.getPath().toString() + " : [" + git.getPath().toAbsolutePath() + "] - " + Elegant.getTitle()
+        stage.setTitle(
+            git.getPath().toString() + " : [" + git.getPath().toAbsolutePath() + "] - " + Elegant.getTitle()
         );
         loadProjectToPathTree();
     }
@@ -160,35 +161,32 @@ public class Controller extends VBox
         TreeItem<PathItem> root = PathTreeItem.createNode(new PathItem(git.getPath()));
         workingDirTree.setRoot(root);
         // remove ignored files and .git
-        workingDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
+        workingDirTree.getRoot().getChildren().removeIf(
+            path -> path.getValue().getPath().endsWith(".git")
         );
         root = PathTreeItem.createNode(new PathItem(git.getPath()));
         stageDirTree.setRoot(root);
         // remove ignored files and .git
-        stageDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
+        stageDirTree.getRoot().getChildren().removeIf(
+            path -> path.getValue().getPath().endsWith(".git")
         );
         root = PathTreeItem.createNode(new PathItem(git.getPath()));
         indexDirTree.setRoot(root);
         // remove ignored files and .git
-        indexDirTree.getRoot().getChildren().removeIf(path -> path.getValue().getPath().endsWith(".git")
+        indexDirTree.getRoot().getChildren().removeIf(
+            path -> path.getValue().getPath().endsWith(".git")
         );
     }
 
     private void failedOpenProject(String message) {
-
-        List<Dialogs.CommandLink> links = Arrays.asList(
-            new Dialogs.CommandLink("Another chance to make an elegant choice", "Opens up the directory chooser again."
-            ), new Dialogs.CommandLink("Admit failure", "Cancel and go back to your work."
-            )
-        );
-        Action answer = Dialogs.create()
-                               .title("Elegant error")
-                               .masthead("That wasn't an elegant choice")
-                               .message(message)
-                               .lightweight()
-                               .style(DialogStyle.UNDECORATED)
-                               .showCommandLinks(links.get(1), links);
-        if (answer == links.get(0)) {
+        DialogAction choice1 = new DialogAction("Another chance to make an elegant choice");
+        choice1.setLongText("Opens up the directory chooser again.");
+        DialogAction choice2 = new DialogAction("Admit failure");
+        choice2.setLongText("Cancel and go back to your work.");
+        Action answer = Dialogs.create().title("Elegant error").masthead("That wasn't an elegant choice").message(
+            message
+        ).lightweight().styleClass(Dialog.STYLE_CLASS_UNDECORATED).showCommandLinks(choice1, choice2);
+        if (answer == choice1) {
             openProject();
         }
     }

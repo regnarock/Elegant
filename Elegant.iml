@@ -8,7 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="JGit" level="project" />
-    <orderEntry type="library" exported="" name="ControlFX_20" level="project" />
+    <orderEntry type="library" exported="" name="ControlsFX_20" level="project" />
     <orderEntry type="library" exported="" name="Lombok" level="project" />
     <orderEntry type="library" name="DataFX" level="project" />
   </component>

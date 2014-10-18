@@ -28,6 +28,7 @@ import elegant.data.Configuration;
 import elegant.exceptions.CredentialsException;
 import elegant.exceptions.ElephantException;
 import elegant.utils.PasswordHash;
+import elegant.utils.UserInfo;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -39,11 +40,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import org.apache.commons.codec.DecoderException;
-import org.controlsfx.control.ButtonBar;
-import org.controlsfx.control.action.AbstractAction;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.DialogStyle;
 import org.controlsfx.dialog.Dialogs;
 
 import javax.crypto.BadPaddingException;
@@ -55,6 +53,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.function.Consumer;
 
 /**
  * Created by regnarock on 24/07/2014.
@@ -63,14 +62,14 @@ public class Credentials
 {
     private Object owner;
 
-    private Dialogs.UserInfo userInfo;
-    private boolean          isLogged;
+    private UserInfo userInfo;
+    private boolean  isLogged;
 
     public Credentials(Object owner) {
         this.owner = owner;
     }
 
-    public Dialogs.UserInfo getUserInfo() throws CredentialsException {
+    public UserInfo getUserInfo() throws CredentialsException {
         if (!isLogged) {
             String userName = Configuration.getUserName(),
                 password = Configuration.getPassword();
@@ -87,7 +86,7 @@ public class Credentials
                     throw new CredentialsException("Could not get credentials IDs : " + e.getMessage());
                 }
             }
-            userInfo = new Dialogs.UserInfo(userName, password);
+            userInfo = new UserInfo(userName, password);
         }
         return userInfo;
     }
@@ -104,7 +103,7 @@ public class Credentials
             InvalidParameterSpecException | InvalidKeySpecException e) {
             throw new CredentialsException("Could not set credentials IDs : " + e.getMessage());
         }
-        userInfo = new Dialogs.UserInfo(userName, password);
+        userInfo = new UserInfo(userName, password);
         Configuration.setUserName(newUserName);
         Configuration.setPassword(newPassword);
     }
@@ -118,26 +117,19 @@ public class Credentials
         // The dialog of credentials will consist of two input fields (username and password),
         // and have two buttons: Login and Cancel.
         Dialog dlg = new Dialog(owner, "Save remote credentials");
-        final TextField txUserName = new TextField(wasNotSaved ? "" : getUserInfo().getUserName());
+        final TextField txUserName = new TextField(wasNotSaved ? "" : getUserInfo().name());
         final PasswordField txPassword = new PasswordField();
-        txPassword.setText(wasNotSaved ? "" : getUserInfo().getPassword());
-        final Action actionSave = new AbstractAction("Save")
-        {
-            {
-                ButtonBar.setType(this, ButtonBar.ButtonType.OK_DONE);
-            }
-
-            @Override
-            public void handle(ActionEvent e) {
-                Dialog dlg = (Dialog) e.getSource();
-                dlg.hide();
-            }
+        txPassword.setText(wasNotSaved ? "" : getUserInfo().password());
+        Consumer<ActionEvent> onAction = e -> {
+            Dialog dialog = (Dialog) e.getSource();
+            dlg.hide();
         };
+        final Action actionSave = new Action("Save", onAction);
         // this lambda is called when the user types into the username / password fields
         Runnable validate = () -> {
-            actionSave.disabledProperty()
-                      .set(txUserName.getText().trim().isEmpty() || txPassword.getText().trim().isEmpty()
-                      );
+            actionSave.disabledProperty().set(
+                txUserName.getText().trim().isEmpty() || txPassword.getText().trim().isEmpty()
+            );
         };
         // listen to user input on dialog (to enable / disable the login button and save box)
         ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
@@ -163,35 +155,31 @@ public class Credentials
         dlg.setResizable(false);
         dlg.setIconifiable(false);
         dlg.setContent(content);
-        dlg.getActions().addAll(actionSave, Dialog.Actions.CANCEL);
+        dlg.getActions().addAll(actionSave, Dialog.ACTION_CANCEL);
         validate.run();
 
         // request focus on the username field by default (so the user can
         // type immediately without having to click first)
-        Platform.runLater(() -> {
-                              txUserName.requestFocus();
-                          }
+        Platform.runLater(
+            () -> {
+                txUserName.requestFocus();
+            }
         );
-        if (dlg.show() == actionSave && (txUserName.getText()
-                                                   .compareTo(getUserInfo().getUserName()) != 0 || txPassword.getText()
-                                                                                                             .compareTo(
-                                                                                                                 getUserInfo()
-                                                                                                                     .getPassword()
-                                                                                                             ) != 0)) {
-            setUserInfo(txUserName.getText(), txPassword.getText());
+        if (dlg.show() == actionSave) {
+            if (txUserName.getText().compareTo(
+                getUserInfo().name()
+            ) != 0 || txPassword.getText().compareTo(getUserInfo().password()) != 0) {
+                setUserInfo(txUserName.getText(), txPassword.getText());
+            }
         }
     }
 
     private String askCreateMasterPassword() throws CredentialsException {
-        Action answer = Dialogs.create()
-                               .title("Master password")
-                               .masthead("No master password was found")
-                               .message("Do you want to secure your credentials and create one ?")
-                               .lightweight()
-                               .style(DialogStyle.UNDECORATED)
-                               .showConfirm();
+        Action answer = Dialogs.create().title("Master password").masthead("No master password was found").message(
+            "Do you want to secure your credentials and create one ?"
+        ).lightweight().styleClass(Dialog.STYLE_CLASS_UNDECORATED).showConfirm();
         String clearPwd = "";
-        if (answer == Dialog.Actions.YES) {
+        if (answer == Dialog.ACTION_YES) {
             clearPwd = createMasterPassword();
         } else {
             throw new CredentialsException("Master password is required to save credentials.");
@@ -207,26 +195,22 @@ public class Credentials
         final Text txError = new Text("Passwords must be equal");
         txError.setVisible(false);
         txError.setFill(Color.RED);
-        final Action actionSave = new AbstractAction("Save")
-        {
-            {
-                ButtonBar.setType(this, ButtonBar.ButtonType.OK_DONE);
-            }
-
-            @Override
-            public void handle(ActionEvent e) {
-                Dialog dlg = (Dialog) e.getSource();
-                dlg.hide();
-            }
-        };
+        final Action actionSave = new Action(
+            "Save", e -> {
+            Dialog dialog = (Dialog) e.getSource();
+            dlg.hide();
+        }
+        );
         // Update save button and error text  when user enters character in text fields
         Runnable validate = () -> {
             boolean pwdDifferent = txPwd1.getText().trim().compareTo(txPwd2.getText().trim()) != 0;
-            actionSave.disabledProperty().set(txPwd1.getText().trim().isEmpty() ||
-                                                  txPwd2.getText().trim().isEmpty() ||
-                                                  pwdDifferent
+            actionSave.disabledProperty().set(
+                txPwd1.getText().trim().isEmpty() ||
+                txPwd2.getText().trim().isEmpty() ||
+                pwdDifferent
             );
-            txError.setVisible(!txPwd2.getText().trim().isEmpty() && pwdDifferent
+            txError.setVisible(
+                !txPwd2.getText().trim().isEmpty() && pwdDifferent
             );
         };
         txPwd1.textProperty().addListener(e -> validate.run());
@@ -250,7 +234,7 @@ public class Credentials
         dlg.setResizable(false);
         dlg.setIconifiable(false);
         dlg.setContent(content);
-        dlg.getActions().addAll(Dialog.Actions.CANCEL, actionSave);
+        dlg.getActions().addAll(Dialog.ACTION_CANCEL, actionSave);
         // request focus on the username field by default (so the user can
         // type immediately without having to click first)
         Platform.runLater(() -> txPwd1.requestFocus());
@@ -285,15 +269,12 @@ public class Credentials
         content.add(pwd, 1, 0);
         GridPane.setHgrow(pwd, Priority.ALWAYS);
 
-        dlg.getActions().addAll(Dialog.Actions.OK, Dialog.Actions.CANCEL);
+        dlg.getActions().addAll(Dialog.ACTION_OK, Dialog.ACTION_CANCEL);
         dlg.setContent(content);
         dlg.setResizable(false);
-        Platform.runLater(() -> {
-                              pwd.requestFocus();
-                          }
-        );
+        Platform.runLater(() -> pwd.requestFocus());
         Action response = dlg.show();
-        if (response == Dialog.Actions.CANCEL) throw new CredentialsException("Access denied.");
+        if (response == Dialog.ACTION_CANCEL) throw new CredentialsException("Access denied.");
         try {
             isLogged = PasswordHash.validatePassword(pwd.getText(), Configuration.getMasterPasswordHash());
         } catch (NoSuchAlgorithmException ex) {
@@ -306,10 +287,8 @@ public class Credentials
     }
 
     private void showCredentialsSecured() {
-        Dialogs.create()
-               .lightweight()
-               .style(DialogStyle.UNDECORATED)
-               .message("Your credential are now secured ! :-)")
-               .showInformation();
+        Dialogs.create().lightweight().styleClass(Dialog.STYLE_CLASS_UNDECORATED).message(
+            "Your credential are now secured ! :-)"
+        ).showInformation();
     }
 }
